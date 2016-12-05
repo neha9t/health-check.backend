@@ -4,26 +4,18 @@ require 'pry'
 require 'data_mapper' # metagem, requires common plugins too.
 
 class ApplicationController < Sinatra::Base
-  before do 
-    content_type :json
-  end
 
   not_found do
     "Whoops! You requested a route which is not available"
   end
 
   configure do
-    set :show_exceptions, false
-    #set :root, File.dirname(__FILE__)
-    #set :views, Proc.new { File.join(root, "views") }
-    #set :views, File.dirname(__FILE__) + '/views'
+    set :show_exceptions, :after_handler
     set :views, File.expand_path('../../views', __FILE__)
-    #set :views, File.expand_path("#{Dir.pwd}/app/views", __FILE__)
-    mime_type :json, "application/json"
   end
 
   error do
-    "Y U No Work?"
+  'Sorry there was a nasty error - ' + env['sinatra.error'].message
   end
 end
 
@@ -55,7 +47,7 @@ DataMapper.auto_migrate!
 class FormdetailsController < ApplicationController
 
   get '/' do
-    request.env.map { |e| e.to_s + "\n" }
+    erb :index
   end
 
   post '/api/details' do
@@ -70,7 +62,6 @@ class FormdetailsController < ApplicationController
   end
 
   get '/details' do
-    content_type :json
     erb :all
     #@formdetails = FormDetails.all(:order => :created_at.desc)
     #@formdetails.to_json
