@@ -1,0 +1,13 @@
+<div class= "span6" ></div>
+<ul id="list-group" class="unstyled">
+<div class="row" >
+<% @details.each do |detail| %>
+  <li class='list-group-item' id="<%= detail[:id] %>">
+  <div class="detail">
+    <%= detail[:url] + '|' + detail[:interval] + '|' + detail[:method]%>
+  </div>
+  </li>
+</div>
+<% end %>
+</ul>
+<a href="/" class="btn btn-primary">Add More?</a>

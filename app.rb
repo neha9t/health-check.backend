@@ -37,7 +37,7 @@ class ApplicationController < Sinatra::Base
   get '/details' do
     @details = FormDetails.all(:order => :created_at.desc)
     redirect '/new' if @details.empty?
-    erb :all
+    erb :view_all
     #@formdetails = FormDetails.all(:order => :created_at.desc)
     #@formdetails.to_json
   end
@@ -64,11 +64,3 @@ end
 #  The `DataMapper.finalize` method is used to check the integrity of your models.
 # It should be called after ALL your models have been created and before your app starts interacting with them.
 DataMapper.finalize
-
-
-
-
-
-
-
-
