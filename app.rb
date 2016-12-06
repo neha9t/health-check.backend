@@ -1,29 +1,45 @@
+
 require 'sinatra'
 require 'sinatra/reloader'
 require 'pry'
 require 'data_mapper' # metagem, requires common plugins too.
 
 class ApplicationController < Sinatra::Base
-  before do 
-    content_type :json
-  end
 
   not_found do
     "Whoops! You requested a route which is not available"
   end
 
   configure do
-    set :show_exceptions, false
-    #set :root, File.dirname(__FILE__)
-    #set :views, Proc.new { File.join(root, "views") }
-    #set :views, File.dirname(__FILE__) + '/views'
-    set :views, File.expand_path('../../views', __FILE__)
-    #set :views, File.expand_path("#{Dir.pwd}/app/views", __FILE__)
-    mime_type :json, "application/json"
+    set :show_exceptions, :after_handler
+    set :views, File.expand_path('../views', __FILE__)
   end
 
   error do
-    "Y U No Work?"
+  'Sorry there was a nasty error - ' + env['sinatra.error'].message
+  end
+
+  get '/' do
+    erb :api_form
+  end
+
+  post '/form/new' do
+    params.to_s
+    "Hello, world, I am the new change!"
+    @formdetails = FormDetails.new(params)
+    @formdetails.save
+    @formdetails.to_json
+    # else
+    # halt 500
+    # end
+  end
+
+  get '/details' do
+    @details = FormDetails.all(:order => :created_at.desc)
+    redirect '/new' if @details.empty?
+    erb :all
+    #@formdetails = FormDetails.all(:order => :created_at.desc)
+    #@formdetails.to_json
   end
 end
 
@@ -49,33 +65,9 @@ end
 # It should be called after ALL your models have been created and before your app starts interacting with them.
 DataMapper.finalize
 
-DataMapper.auto_migrate!
 
 
-class FormdetailsController < ApplicationController
 
-  get '/' do
-    request.env.map { |e| e.to_s + "\n" }
-  end
-
-  post '/api/details' do
-    params.to_s
-    "Hello, world, I am the new change!"
-    @formdetails = FormDetails.new(params)
-    @formdetails.save
-    @formdetails.to_json
-    # else
-    # halt 500
-    # end
-  end
-
-  get '/details' do
-    content_type :json
-    erb :all
-    #@formdetails = FormDetails.all(:order => :created_at.desc)
-    #@formdetails.to_json
-  end
-end
 
 
 

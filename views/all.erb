@@ -1,0 +1,23 @@
+
+
+
+
+
+
+
+
+
+<ul id="url-list" class="unstyled">
+<% @details.each do |detail| %>
+  <li id="<%= detail[:id] %>">
+  <span class="detail">
+    <%= detail[:done] ? "<del>#{detail[:content]}</del>" : detail[:content] %>
+  </span>
+  <span class="pull-right">
+    <a href="#" class="btn done"><%= detail[:done] ? "Not done" : "Done"%></a>
+    <a href="/delete/<%= detail[:id] %>" class="btn btn-danger">Delete</a>
+  </span>
+  </li>
+<% end %>
+</ul>
+<a href="/new" class="btn btn-primary">Add More?</a>
