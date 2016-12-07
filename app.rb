@@ -20,18 +20,15 @@ class ApplicationController < Sinatra::Base
   end
 
   get '/' do
-    erb :api_form
+    erb :index
   end
 
-  post '/form/new' do
+  post '/details/new' do
     params.to_s
     "Hello, world, I am the new change!"
     @formdetails = FormDetails.new(params)
     @formdetails.save
     @formdetails.to_json
-    # else
-    # halt 500
-    # end
   end
 
   get '/details' do
@@ -40,6 +37,16 @@ class ApplicationController < Sinatra::Base
     erb :view_all
     #@formdetails = FormDetails.all(:order => :created_at.desc)
     #@formdetails.to_json
+  end
+
+  put '/detail/:id' do
+    @detail = FormDetails.find(params[:id])
+    @detail.update(params[:id])
+    redirect to("/details")
+  end
+
+  delete '/detail/:id' do
+    
   end
 end
 

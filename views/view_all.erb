@@ -1,13 +1,35 @@
-<div class= "span6" ></div>
-<ul id="list-group" class="unstyled">
-<div class="row" >
-<% @details.each do |detail| %>
-  <li class='list-group-item' id="<%= detail[:id] %>">
-  <div class="detail">
-    <%= detail[:url] + '|' + detail[:interval] + '|' + detail[:method]%>
-  </div>
-  </li>
+
+
+  <div class="container">
+  <a href="/" class="btn btn-primary">Add More</a>         
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Endpoint URL</th>
+        <th>Method</th>
+        <th>Interval</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+    <% @details.each do |detail| %>
+      <tr>
+        <td><%=detail[:id]%></td>
+        <td><%=detail[:url]%></td>
+        <td><%=detail[:method]%></td>
+        <td><%=detail[:interval]%></td>
+        <td>
+          <a class="btn btn-default actionButton" href="#"> Check </a>
+          <a class="btn btn-default actionButton" href="/detail/id"> Edit </a>
+          <a class="btn btn-default actionButton" href="#"> Delete </a>
+        </td>
+      </tr>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+
 </div>
-<% end %>
-</ul>
-<a href="/" class="btn btn-primary">Add More?</a>
+
+
