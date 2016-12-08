@@ -23,30 +23,51 @@ class ApplicationController < Sinatra::Base
     erb :index
   end
 
+   get '/show' do
+    erb :api_form
+  end
+
   post '/details/new' do
     params.to_s
     "Hello, world, I am the new change!"
-    @formdetails = FormDetails.new(params)
-    @formdetails.save
-    @formdetails.to_json
+    @details = FormDetails.new(params)
+    @details.save
+    redirect to("/details")
   end
 
   get '/details' do
     @details = FormDetails.all(:order => :created_at.desc)
-    redirect '/new' if @details.empty?
+    redirect '/details/new' if @details.empty?
     erb :view_all
-    #@formdetails = FormDetails.all(:order => :created_at.desc)
-    #@formdetails.to_json
   end
 
-  put '/detail/:id' do
-    @detail = FormDetails.find(params[:id])
-    @detail.update(params[:id])
+  get '/details/:id' do
+    @details = FormDetails.get(params[:id])
+    @title = "Edit note ##{params[:id]}"
+    erb :edit
+  end
+
+  put '/details/:id' do
+    binding.pry
+    @details = FormDetails.get(params[:id])
+    @details.method = params[:method]
+    @details.interval = params[:interval]
+    @details.url = params[:url]
+    @details.save
+    #@details.update(params[:id])
     redirect to("/details")
   end
 
-  delete '/detail/:id' do
-    
+  get '/:id/delete' do
+    @details = FormDetails.get(params[:id])
+    @title = "Edit note ##{params[:id]}"
+    erb :delete
+  end
+
+  delete '/:id' do
+    @details = FormDetails.get(params[:id])
+    @details.destroy
+    redirect to("/details") 
   end
 end
 
