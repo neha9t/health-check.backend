@@ -1,7 +1,7 @@
 
 
   <div class="container">
-  <a href="/" class="btn btn-primary">Add More</a>         
+  <a href="/show" class="btn btn-primary">Add More</a>         
   <table class="table table-striped">
     <thead>
       <tr>
@@ -21,8 +21,8 @@
         <td><%=detail[:interval]%></td>
         <td>
           <a class="btn btn-default actionButton" href="#"> Check </a>
-          <a class="btn btn-default actionButton" href="/detail/id"> Edit </a>
-          <a class="btn btn-default actionButton" href="#"> Delete </a>
+          <a class="btn btn-default actionButton" href="/details/<%=detail.id%>"> Edit </a>
+          <a class="btn btn-default actionButton" href="/<%=detail.id%>/delete"> Delete </a>
         </td>
       </tr>
       </tr>

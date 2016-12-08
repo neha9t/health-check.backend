@@ -2,7 +2,8 @@
     <div class="container" style="max-width:600px;padding:90px 90px;">
         <h3>Details</h3>
 
-        <form action="/form/#{:id}" method="PUT">
+        <form action="/details/<%=@details.id%>" method="POST">
+           <input type="hidden" name="_method" value="PUT" />
           <div class = "form-group">
             <label for="url" class = "control-label">URL:</label>
             <div class="input-group">
@@ -35,7 +36,7 @@
           <div class = "form-group">
             <div class = "col-sm-offset-8 col-sm-12">
               <button type = "reset" class = "btn btn-default">Reset</button>
-              <button type = "submit" class = "btn btn-primary">Submit</button>
+              <button type = "submit" class = "btn btn-primary">Edit</button>
             </div>
           </div>
         </form>
