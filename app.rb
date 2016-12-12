@@ -48,13 +48,11 @@ class ApplicationController < Sinatra::Base
   end
 
   put '/details/:id' do
-    binding.pry
     @details = FormDetails.get(params[:id])
     @details.method = params[:method]
     @details.interval = params[:interval]
     @details.url = params[:url]
     @details.save
-    #@details.update(params[:id])
     redirect to("/details")
   end
 
