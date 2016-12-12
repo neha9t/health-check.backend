@@ -11,3 +11,8 @@ gem 'json'
 gem 'thin'
 gem 'rerun'
 gem 'shotgun'
+
+group :test do
+  gem 'minitest'
+  gem 'rack-test'
+end
