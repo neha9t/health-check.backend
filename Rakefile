@@ -2,5 +2,5 @@
 
 desc "Run all tests"
 task(:test) do
-  Dir['./test/*_test.rb'].each { |f| load f }
+  Dir['./tests/*_test.rb'].each { |f| load f }
 end

@@ -1,4 +1,4 @@
-source 'https://rubygems.org'
+ source 'https://rubygems.org'
 
 gem 'sinatra'
 gem 'sinatra-contrib'
@@ -11,6 +11,7 @@ gem 'json'
 gem 'thin'
 gem 'rerun'
 gem 'shotgun'
+gem 'factory_girl'
 
 group :test do
   gem 'minitest'

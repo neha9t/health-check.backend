@@ -32,12 +32,14 @@ class ApplicationController < Sinatra::Base
     "Hello, world, I am the new change!"
     @details = FormDetails.new(params)
     @details.save
+    @details.to_json
     redirect to("/details")
   end
 
   get '/details' do
     @details = FormDetails.all(:order => :created_at.desc)
     redirect '/details/new' if @details.empty?
+    @details.to_json
     erb :view_all
   end
 
@@ -49,7 +51,7 @@ class ApplicationController < Sinatra::Base
 
   put '/details/:id' do
     @details = FormDetails.get(params[:id])
-    @details.method = params[:method]
+    @details.method_name = params[:method_name]
     @details.interval = params[:interval]
     @details.url = params[:url]
     @details.save
@@ -81,7 +83,7 @@ class FormDetails
   include DataMapper::Resource
   property :id,           Serial
   property :url,          String, :required => true
-  property :method,       String, :required => true
+  property :method_name,  String, :required => true
   property :interval,     String, :required => true
   property :created_at,   DateTime
 end
@@ -90,3 +92,5 @@ end
 #  The `DataMapper.finalize` method is used to check the integrity of your models.
 # It should be called after ALL your models have been created and before your app starts interacting with them.
 DataMapper.finalize
+DataMapper.auto_migrate!
+
