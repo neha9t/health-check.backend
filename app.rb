@@ -6,6 +6,19 @@ require 'data_mapper' # metagem, requires common plugins too.
 
 class ApplicationController < Sinatra::Base
 
+  helpers do
+    def protected!
+      return if authorized?
+      headers['WWW-Authenticate'] = 'Basic realm="Restricted Area"'
+      halt 401, "Not authorized\n"
+    end
+
+    def authorized?
+      @auth ||=  Rack::Auth::Basic::Request.new(request.env)
+      @auth.provided? and @auth.basic? and @auth.credentials and @auth.credentials == ['admin', 'admin']
+    end
+  end
+
   not_found do
     "Whoops! You requested a route which is not available"
   end
@@ -23,12 +36,23 @@ class ApplicationController < Sinatra::Base
     erb :index
   end
 
-   get '/show' do
-    erb :api_form
+  get '/login' do
+    erb :login
+  end
+
+  get '/show' do
+    erb :new
+  end
+
+  post '/login/' do
+    if protected!
+      redirect to '/details'
+    end
   end
 
   post '/details/new' do
     params.to_s
+    binding.pry
     "Hello, world, I am the new change!"
     @details = FormDetails.new(params)
     @details.save
@@ -38,7 +62,7 @@ class ApplicationController < Sinatra::Base
 
   get '/details' do
     @details = FormDetails.all(:order => :created_at.desc)
-    redirect '/details/new' if @details.empty?
+    redirect to('/show') if @details.empty?
     @details.to_json
     erb :view_all
   end
@@ -93,4 +117,5 @@ end
 # It should be called after ALL your models have been created and before your app starts interacting with them.
 DataMapper.finalize
 DataMapper.auto_migrate!
+FormDetails.destroy
 
