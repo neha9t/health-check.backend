@@ -3,6 +3,7 @@ require 'sinatra'
 require 'sinatra/reloader'
 require 'pry'
 require 'data_mapper' # metagem, requires common plugins too.
+#require './models/FormDetails'
 
 class ApplicationController < Sinatra::Base
 
@@ -118,4 +119,5 @@ end
 DataMapper.finalize
 DataMapper.auto_migrate!
 FormDetails.destroy
+DataMapper.auto_upgrade!
 
