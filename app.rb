@@ -27,6 +27,7 @@ class ApplicationController < Sinatra::Base
   configure do
     set :show_exceptions, :after_handler
     set :views, File.expand_path('../views', __FILE__)
+    DataMapper.auto_upgrade!
   end
 
   error do
@@ -46,14 +47,14 @@ class ApplicationController < Sinatra::Base
   end
 
   post '/login/' do
-    if protected!
+    protected!
+    if authorized?
       redirect to '/details'
     end
   end
 
   post '/details/new' do
     params.to_s
-    binding.pry
     "Hello, world, I am the new change!"
     @details = FormDetails.new(params)
     @details.save
@@ -62,10 +63,13 @@ class ApplicationController < Sinatra::Base
   end
 
   get '/details' do
-    @details = FormDetails.all(:order => :created_at.desc)
-    redirect to('/show') if @details.empty?
-    @details.to_json
-    erb :view_all
+    protected!
+    if authorized?
+      @details = FormDetails.all(:order => :created_at.desc)
+      redirect to('/show') if @details.empty?
+      @details.to_json
+      erb :view_all
+    end
   end
 
   get '/details/:id' do
@@ -117,7 +121,5 @@ end
 #  The `DataMapper.finalize` method is used to check the integrity of your models.
 # It should be called after ALL your models have been created and before your app starts interacting with them.
 DataMapper.finalize
-DataMapper.auto_migrate!
-FormDetails.destroy
-DataMapper.auto_upgrade!
+
 

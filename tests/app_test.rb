@@ -11,8 +11,7 @@ configure do
   DataMapper::setup(:default, "sqlite3:test.db")
   DataMapper.finalize
   DataMapper.auto_migrate!
-  binding.pry
-  FormDetails.auto_upgrade!
+  DataMapper.auto_upgrade!
 end
 
 class ApplicationControllerTest < Test::Unit::TestCase
@@ -20,7 +19,7 @@ class ApplicationControllerTest < Test::Unit::TestCase
   include FactoryGirl::Syntax::Methods
 
   def app
-    @app ||= ApplicationController.new
+    @app ||= Sinatra::Application
   end
 
   def test_1_home_page
@@ -42,11 +41,12 @@ class ApplicationControllerTest < Test::Unit::TestCase
 
   def test_4_view_details
     get '/details'
-    assert_equal last_response.status, 200
+    assert_equal last_response.status, 401
   end
 
   def test_5_view_single_detail
     @details = FactoryGirl.create(:details)
+    binding.pry
     get '/details/1'
     assert_equal last_response.status, 200
   end
@@ -69,4 +69,32 @@ class ApplicationControllerTest < Test::Unit::TestCase
     assert_equal last_response.status, 302
   end
 
+  def test_without_authentication
+    get '/details'
+    assert_equal 401, last_response.status
+  end
+
+  def test_with_bad_credentials_1
+    authorize 'bad', 'boy'
+    get '/details'
+    assert_equal 401, last_response.status
+  end
+
+  def test_with_bad_credentials
+    authorize 'bad', 'boy'
+    get '/details'
+    assert_equal 401, last_response.status
+  end
+
+  def test_with_proper_credentials_1
+    authorize 'admin', 'admin'
+    get '/details'
+    assert_equal 200, last_response.status
+  end
+
+  def test_with_proper_credentials
+    authorize 'admin', 'admin'
+    post '/login/'
+    assert_equal 302, last_response.status
+  end
 end
