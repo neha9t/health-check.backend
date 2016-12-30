@@ -3,7 +3,14 @@ require 'sinatra'
 require 'sinatra/reloader'
 require 'pry'
 require 'data_mapper' # metagem, requires common plugins too.
-#require './models/FormDetails'
+require 'resque'
+
+class Check
+  @queue = :check
+  def self.perform(check)
+    puts "Ate #{check}!"
+  end
+end
 
 class ApplicationController < Sinatra::Base
 
@@ -28,6 +35,7 @@ class ApplicationController < Sinatra::Base
     set :show_exceptions, :after_handler
     set :views, File.expand_path('../views', __FILE__)
     DataMapper.auto_upgrade!
+    Resque.redis = Redis.new(:host => 'localhost', :port => 6379, :thread_safe => true)
   end
 
   error do
@@ -97,6 +105,11 @@ class ApplicationController < Sinatra::Base
     @details = FormDetails.get(params[:id])
     @details.destroy
     redirect to("/details") 
+  end
+
+  get '/eat/:food' do
+    Resque.enqueue(Check, params['check'])
+    "Put #{params['check']} in fridge to eat later."
   end
 end
 

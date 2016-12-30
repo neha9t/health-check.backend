@@ -1,4 +1,6 @@
 #task :default => :test
+require './app'
+require 'resque/tasks'
 
 desc "Run all tests"
 task(:test) do

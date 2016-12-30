@@ -12,6 +12,7 @@ gem 'thin'
 gem 'rerun'
 gem 'shotgun'
 gem 'factory_girl'
+gem 'resque'
 
 group :test do
   gem 'minitest'
