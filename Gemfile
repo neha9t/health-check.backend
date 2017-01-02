@@ -13,6 +13,8 @@ gem 'rerun'
 gem 'shotgun'
 gem 'factory_girl'
 gem 'resque'
+gem 'foreman'
+gem 'resque-scheduler'
 
 group :test do
   gem 'minitest'
