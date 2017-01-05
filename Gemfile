@@ -15,6 +15,7 @@ gem 'factory_girl'
 gem 'resque'
 gem 'foreman'
 gem 'resque-scheduler'
+gem 'rake'
 
 group :test do
   gem 'minitest'

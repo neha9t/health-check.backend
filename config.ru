@@ -9,8 +9,8 @@ Bundler.require
 require './app'
 
 use Rack::MethodOverride
-run Rack::URLMap.new \
-  "/resque" => Resque::Server.new
+
+Resque.logger.formatter = Resque::VeryVerboseFormatter.new
 
 
 run ApplicationController

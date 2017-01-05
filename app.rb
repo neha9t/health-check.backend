@@ -4,14 +4,22 @@ require 'sinatra/reloader'
 require 'pry'
 require 'data_mapper' # metagem, requires common plugins too.
 require 'resque'
+require 'dm-migrations/migration_runner'
 
+
+
+# Resque
 class Check
   @queue = :check
   def self.perform(check)
-    puts "Ate #{check}!"
+    loop do
+      sleep(1)
+      puts "Ate #{check}!"
+    end
   end
 end
 
+# app.rb
 class ApplicationController < Sinatra::Base
 
   helpers do
@@ -35,7 +43,6 @@ class ApplicationController < Sinatra::Base
     set :show_exceptions, :after_handler
     set :views, File.expand_path('../views', __FILE__)
     DataMapper.auto_upgrade!
-    Resque.redis = Redis.new(:host => 'localhost', :port => 6379, :thread_safe => true)
   end
 
   error do
@@ -108,8 +115,8 @@ class ApplicationController < Sinatra::Base
   end
 
   get '/eat/:food' do
-    Resque.enqueue(Check, params['check'])
-    "Put #{params['check']} in fridge to eat later."
+    Resque.enqueue(Check, params['food'])
+    "Put #{params['food']} in fridge to eat later."
   end
 end
 
@@ -127,6 +134,8 @@ class FormDetails
   property :url,          String, :required => true
   property :method_name,  String, :required => true
   property :interval,     String, :required => true
+  property :success,      Boolean, :required => true, :default => false
+  property :status,       String, :required => true ,:default => "Not Running"
   property :created_at,   DateTime
 end
 # Perform basic sanity checks and initialize all relationships
@@ -134,5 +143,5 @@ end
 #  The `DataMapper.finalize` method is used to check the integrity of your models.
 # It should be called after ALL your models have been created and before your app starts interacting with them.
 DataMapper.finalize
-
+DataMapper.auto_upgrade!
 
