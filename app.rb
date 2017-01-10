@@ -1,20 +1,28 @@
 
 require 'sinatra'
 require 'sinatra/reloader'
-require 'pry'
 require 'data_mapper' # metagem, requires common plugins too.
 require 'resque'
 require 'dm-migrations/migration_runner'
+require 'rest-client'
+require 'json'
+require 'pry'
 
 
 
 # Resque
 class Check
   @queue = :check
-  def self.perform(check)
-    loop do
-      sleep(1)
-      puts "Ate #{check}!"
+  def self.perform(details_id, details_url)
+    record = FormDetails.all(:id => details_id, :url => details_url)
+    record_url = record.first.url
+
+    if record.first.success == "true"
+      session_response = RestClient.get(record_url, headers={})
+      session_code = session_response.code
+      json_session_response = JSON.parse(session_response)
+      puts json_session_response
+      puts "Performed the Job"
     end
   end
 end
@@ -74,7 +82,9 @@ class ApplicationController < Sinatra::Base
     @details = FormDetails.new(params)
     @details.save
     @details.to_json
-    redirect to("/details")
+    binding.pry
+    #redirect to("/details")
+    Resque.enqueue(Check, @details.id, @details.url)
   end
 
   get '/details' do
@@ -98,6 +108,7 @@ class ApplicationController < Sinatra::Base
     @details.method_name = params[:method_name]
     @details.interval = params[:interval]
     @details.url = params[:url]
+    @details.success = params[:success]
     @details.save
     redirect to("/details")
   end
