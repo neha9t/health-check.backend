@@ -3,6 +3,7 @@
 gem 'sinatra'
 gem 'sinatra-contrib'
 gem 'pry'
+gem 'rb-readline'
 gem 'faker'
 gem 'dm-sqlite-adapter'
 gem 'data_mapper'
@@ -16,6 +17,7 @@ gem 'resque'
 gem 'foreman'
 gem 'resque-scheduler'
 gem 'rake'
+gem 'rest-client'
 
 group :test do
   gem 'minitest'
