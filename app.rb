@@ -7,6 +7,8 @@ require 'dm-migrations/migration_runner'
 require 'rest-client'
 require 'json'
 require 'pry'
+require 'resque-scheduler'
+require 'resque/scheduler/server'
 
 
 
@@ -21,8 +23,8 @@ class Check
       session_response = RestClient.get(record_url, headers={})
       session_code = session_response.code
       json_session_response = JSON.parse(session_response)
-      puts json_session_response
-      puts "Performed the Job"
+      print json_session_response
+      print "Performed the Job"
     end
   end
 end
