@@ -86,7 +86,7 @@ class ApplicationController < Sinatra::Base
     @details.to_json
     binding.pry
     #redirect to("/details")
-    Resque.enqueue(Check, @details.id, @details.url)
+    Resque.enqueue_in(@details.interval.to_i,Check, @details.id, @details.url)
   end
 
   get '/details' do
