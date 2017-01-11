@@ -20,7 +20,6 @@ namespace :resque do
   task :setup_schedule => :setup do
     require 'resque-scheduler'
     Resque::Scheduler.dynamic = true
-		require 'jobs'
   end
 
   task :scheduler => :setup_schedule
