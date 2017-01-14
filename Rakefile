@@ -14,14 +14,14 @@ namespace :resque do
     require 'resque'
 
     Resque.redis = 'localhost:6379'
-    
+
   end
 
   task :setup_schedule => :setup do
     require 'resque-scheduler'
     Resque::Scheduler.dynamic = true
-		require 'jobs'
+#		require 'jobs'
   end
 
   task :scheduler => :setup_schedule
-end	
+end

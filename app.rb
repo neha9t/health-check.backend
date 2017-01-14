@@ -9,22 +9,25 @@ require 'json'
 require 'pry'
 require 'resque-scheduler'
 require 'resque/scheduler/server'
-
+require 'active_support'
+require 'active_support/core_ext'
 
 
 # Resque
 class Check
   @queue = :check
-  def self.perform(details_id, details_url)
-    record = FormDetails.all(:id => details_id, :url => details_url)
+  def self.perform(details_id)
+    record = FormDetails.all(:id => details_id)
     record_url = record.first.url
 
-    if record.first.success == "true"
+    if record.first.success == true
       session_response = RestClient.get(record_url, headers={})
       session_code = session_response.code
-      json_session_response = JSON.parse(session_response)
-      print json_session_response
-      print "Performed the Job"
+      if session_code != 200
+          # Send mail
+      else
+          Resque.enqueue_at(record.first.interval.second.from_now, Check, details_id)
+      end
     end
   end
 end
@@ -84,9 +87,8 @@ class ApplicationController < Sinatra::Base
     @details = FormDetails.new(params)
     @details.save
     @details.to_json
-    binding.pry
-    #redirect to("/details")
-    Resque.enqueue(Check, @details.id, @details.url)
+    Resque.enqueue(Check,@details.id)
+    redirect to("/details")
   end
 
   get '/details' do
@@ -124,7 +126,7 @@ class ApplicationController < Sinatra::Base
   delete '/:id' do
     @details = FormDetails.get(params[:id])
     @details.destroy
-    redirect to("/details") 
+    redirect to("/details")
   end
 
   get '/eat/:food' do
@@ -146,7 +148,7 @@ class FormDetails
   property :id,           Serial
   property :url,          String, :required => true
   property :method_name,  String, :required => true
-  property :interval,     String, :required => true
+  property :interval,     Integer, :required => true
   property :success,      Boolean, :required => true, :default => false
   property :status,       String, :required => true ,:default => "Not Running"
   property :created_at,   DateTime
