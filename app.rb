@@ -52,7 +52,6 @@ class ApplicationController < Sinatra::Base
   configure do
     set :show_exceptions, :after_handler
     set :views, File.expand_path('../views', __FILE__)
-    DataMapper.auto_upgrade!
   end
 
   error do
@@ -143,15 +142,15 @@ DataMapper.setup(:default, 'sqlite:development.db')
 
 class FormDetails
   include DataMapper::Resource
-  property :id,           Serial
-  property :url,          String, :required => true
-  property :method_name,  String, :required => true
-  property :interval,     String, :required => true
-  property :success,      Boolean, :required => true, :default => false
-  property :status,       String, :required => true ,:default => "Not Running"
-  property :created_at,   DateTime
+  property :id,                 Serial
+  property :url,                String, :required => true
+  property :method_name,        String, :required => true
+  property :interval,           String, :required => true
+  property :check_enabled,      Boolean, :required => true, :default => false
+  property :status,             String, :required => true ,:default => "Not Running"
+  property :created_at,         DateTime
 end
-# Perform basic sanity checks and initialize all relationships
+
 # Call this when you've defined all your models
 #  The `DataMapper.finalize` method is used to check the integrity of your models.
 # It should be called after ALL your models have been created and before your app starts interacting with them.
