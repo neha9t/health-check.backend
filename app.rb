@@ -17,16 +17,18 @@ require 'active_support/core_ext'
 class Check
   @queue = :check
   def self.perform(details_id)
+    binding.pry
     record = FormDetails.all(:id => details_id)
     record_url = record.first.url
-
-    if record.first.success == true
+    if record.first.enabled == true
+     
       session_response = RestClient.get(record_url, headers={})
       session_code = session_response.code
       if session_code != 200
           # Send mail
       else
-          Resque.enqueue_at(record.first.interval.second.from_now, Check, details_id)
+        binding.pry
+        Resque.enqueue_at(record.first.interval.second.from_now, Check, details_id)
       end
     end
   end
@@ -86,6 +88,7 @@ class ApplicationController < Sinatra::Base
     @details = FormDetails.new(params)
     @details.save
     @details.to_json
+    binding.pry
     Resque.enqueue(Check,@details.id)
     redirect to("/details")
   end
@@ -111,8 +114,9 @@ class ApplicationController < Sinatra::Base
     @details.method_name = params[:method_name]
     @details.interval = params[:interval]
     @details.url = params[:url]
-    @details.success = params[:success]
+    @details.enabled = params[:enabled]
     @details.save
+    binding.pry
     redirect to("/details")
   end
 
@@ -126,11 +130,6 @@ class ApplicationController < Sinatra::Base
     @details = FormDetails.get(params[:id])
     @details.destroy
     redirect to("/details")
-  end
-
-  get '/eat/:food' do
-    Resque.enqueue(Check, params['food'])
-    "Put #{params['food']} in fridge to eat later."
   end
 end
 
@@ -147,8 +146,8 @@ class FormDetails
   property :id,                 Serial
   property :url,                String, :required => true
   property :method_name,        String, :required => true
-  property :interval,           String, :required => true
-  property :check_enabled,      Boolean, :required => true, :default => false
+  property :interval,           Integer, :required => true
+  property :enabled,      Boolean, :required => true, :default => false
   property :status,             String, :required => true ,:default => "Not Running"
   property :created_at,         DateTime
 end
@@ -157,5 +156,6 @@ end
 #  The `DataMapper.finalize` method is used to check the integrity of your models.
 # It should be called after ALL your models have been created and before your app starts interacting with them.
 DataMapper.finalize
+#DataMapper.auto_migrate!
 DataMapper.auto_upgrade!
 
