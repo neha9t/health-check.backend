@@ -20,7 +20,7 @@ class Check
     record = FormDetails.all(:id => details_id)
     record_url = record.first.url
 
-    if record.first.success == true
+    if record.first.enabled == true
       session_response = RestClient.get(record_url, headers={})
       session_code = session_response.code
       if session_code != 200
@@ -112,7 +112,7 @@ class ApplicationController < Sinatra::Base
     @details.method_name = params[:method_name]
     @details.interval = params[:interval]
     @details.url = params[:url]
-    @details.success = params[:success]
+    @details.enabled = params[:enabled]
     @details.save
     redirect to("/details")
   end
@@ -129,10 +129,6 @@ class ApplicationController < Sinatra::Base
     redirect to("/details")
   end
 
-  get '/eat/:food' do
-    Resque.enqueue(Check, params['food'])
-    "Put #{params['food']} in fridge to eat later."
-  end
 end
 
 
@@ -149,7 +145,7 @@ class FormDetails
   property :url,          String, :required => true
   property :method_name,  String, :required => true
   property :interval,     Integer, :required => true
-  property :success,      Boolean, :required => true, :default => false
+  property :enabled,      Boolean, :required => true, :default => false
   property :status,       String, :required => true ,:default => "Not Running"
   property :created_at,   DateTime
 end
@@ -158,5 +154,6 @@ end
 #  The `DataMapper.finalize` method is used to check the integrity of your models.
 # It should be called after ALL your models have been created and before your app starts interacting with them.
 DataMapper.finalize
+DataMapper.auto_migrate!
 DataMapper.auto_upgrade!
 
