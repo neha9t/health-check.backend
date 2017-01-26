@@ -23,6 +23,7 @@ class Check
     if record.first.enabled == true
       session_response = RestClient.get(record_url, headers={})
       session_code = session_response.code
+
       if session_code != 200
           # Send mail
       else
@@ -56,6 +57,7 @@ class ApplicationController < Sinatra::Base
     set :show_exceptions, :after_handler
     set :views, File.expand_path('../views', __FILE__)
     DataMapper.auto_upgrade!
+    Resque::Scheduler.dynamic = true
   end
 
   error do
@@ -87,7 +89,9 @@ class ApplicationController < Sinatra::Base
     @details = FormDetails.new(params)
     @details.save
     @details.to_json
-    Resque.enqueue(Check,@details.id)
+    if params[:enabled] == true
+      Resque.enqueue(Check,@details.id)
+    end
     redirect to("/details")
   end
 
@@ -104,16 +108,25 @@ class ApplicationController < Sinatra::Base
   get '/details/:id' do
     @details = FormDetails.get(params[:id])
     @title = "Edit note ##{params[:id]}"
+    @details.to_json
     erb :edit
   end
 
   put '/details/:id' do
     @details = FormDetails.get(params[:id])
+    if params[:enabled] != @details.enabled
+      if params[:enabled] == true
+        Resque.enqueue(Check,@details.id)
+      else
+        Resque.dequeue(Check,@details.id)
+      end
+    end
     @details.method_name = params[:method_name]
     @details.interval = params[:interval]
     @details.url = params[:url]
     @details.enabled = params[:enabled]
     @details.save
+    @details.to_json
     redirect to("/details")
   end
 
@@ -154,6 +167,4 @@ end
 #  The `DataMapper.finalize` method is used to check the integrity of your models.
 # It should be called after ALL your models have been created and before your app starts interacting with them.
 DataMapper.finalize
-DataMapper.auto_migrate!
 DataMapper.auto_upgrade!
-
