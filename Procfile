@@ -1,3 +1,2 @@
 web: rackup
-worker: rake resque:work QUEUE=check VVERBOSE=1
-clock: rake resque:scheduler
+worker: bundle exec sidekiq -r ./app.rb -q check -v
