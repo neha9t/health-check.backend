@@ -2,36 +2,58 @@
 require 'sinatra'
 require 'sinatra/reloader'
 require 'data_mapper' # metagem, requires common plugins too.
-require 'resque'
+#require 'resque'
 require 'dm-migrations/migration_runner'
 require 'rest-client'
 require 'json'
 require 'pry'
-require 'resque-scheduler'
-require 'resque/scheduler/server'
+#require 'resque-scheduler'
+#require 'resque/scheduler/server'
 require 'active_support'
 require 'active_support/core_ext'
+#require 'resque/errors'
+require_relative 'lib/sidekiq-worker'
 
+# require 'sidekiq'
 
-# Resque
-class Check
-  @queue = :check
-  def self.perform(details_id)
-    record = FormDetails.all(:id => details_id)
-    record_url = record.first.url
+# #Sidekiq
+# Sidekiq.configure_client do |config|
+#   config.redis = { url: "redis://localhost:6379/1" }
+# end
 
-    if record.first.enabled == true
-      session_response = RestClient.get(record_url, headers={})
-      session_code = session_response.code
+# Sidekiq.configure_server do |config|
+#   config.redis = { url: "redis://localhost:6379/1"}
+# end
 
-      if session_code != 200
-          # Send mail
-      else
-          Resque.enqueue_at(record.first.interval.second.from_now, Check, details_id)
-      end
-    end
-  end
-end
+# #Worker
+# class HealthCheck
+  
+#   include Sidekiq::Worker
+#   sidekiq_options :queue => :check, :retry => true, :backtrace => true
+#   def perform(details_id)
+#     count = 0
+#     record = FormDetails.all(:id => details_id)
+#     record_url = record.first.url
+#     if record.first.enabled == true
+#       session_response = RestClient.get(record_url, headers={})
+#       session_code = session_response.code
+
+#       if session_code != 200
+#           # Send mail
+#       else
+#           count = count + 1
+#           count.to_s
+#           puts "I am inside ELSE before recurring for #{count} times"
+#           #Resque.enqueue_in(record.first.interval.second.from_now, Check, details_id)
+#           HealthCheck.perform_in(record.first.interval.second.from_now,details_id)
+
+#           record.first.status = "Last Run: #{Time.now}"
+#           record.save
+#           puts "I am inside ELSE after recurring for #{count} times"
+#       end
+#     end
+#   end
+# end
 
 # app.rb
 class ApplicationController < Sinatra::Base
@@ -57,7 +79,6 @@ class ApplicationController < Sinatra::Base
     set :show_exceptions, :after_handler
     set :views, File.expand_path('../views', __FILE__)
     DataMapper.auto_upgrade!
-    Resque::Scheduler.dynamic = true
   end
 
   error do
@@ -88,10 +109,11 @@ class ApplicationController < Sinatra::Base
     "Hello, world, I am the new change!"
     @details = FormDetails.new(params)
     @details.save
-    @details.to_json
-    if params[:enabled] == true
-      Resque.enqueue(Check,@details.id)
+    binding.pry
+    if params[:enabled] == "true"
+      HealthCheck.perform_async(@details.id)
     end
+    @details.to_json
     redirect to("/details")
   end
 
@@ -116,9 +138,8 @@ class ApplicationController < Sinatra::Base
     @details = FormDetails.get(params[:id])
     if params[:enabled] != @details.enabled
       if params[:enabled] == true
-        Resque.enqueue(Check,@details.id)
+        HealthCheck.perform_async(@details.id)
       else
-        Resque.dequeue(Check,@details.id)
       end
     end
     @details.method_name = params[:method_name]
@@ -147,7 +168,6 @@ end
 
 # If you want the logs displayed you have to do this before the call to setup
 #DataMapper::Logger.new($stdout, :debug)
-#binding.pry
 
 # A Sqlite3 connection to a persistent database
 DataMapper.setup(:default, 'sqlite:development.db')
@@ -162,9 +182,6 @@ class FormDetails
   property :status,       String, :required => true ,:default => "Not Running"
   property :created_at,   DateTime
 end
-# Perform basic sanity checks and initialize all relationships
-# Call this when you've defined all your models
-#  The `DataMapper.finalize` method is used to check the integrity of your models.
-# It should be called after ALL your models have been created and before your app starts interacting with them.
+
 DataMapper.finalize
 DataMapper.auto_upgrade!
