@@ -15,9 +15,11 @@ gem 'shotgun'
 gem 'factory_girl'
 gem 'resque'
 gem 'foreman'
-gem 'resque-scheduler'
 gem 'rake'
 gem 'rest-client'
+
+gem "sidekiq"
+gem 'slim'
 
 group :test do
   gem 'minitest'
