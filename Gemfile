@@ -20,6 +20,7 @@ gem 'rest-client'
 
 gem "sidekiq"
 gem 'slim'
+gem 'sendgrid-ruby'
 
 group :test do
   gem 'minitest'
