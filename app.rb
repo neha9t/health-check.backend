@@ -13,47 +13,7 @@ require 'active_support'
 require 'active_support/core_ext'
 #require 'resque/errors'
 require_relative 'lib/sidekiq-worker'
-
-# require 'sidekiq'
-
-# #Sidekiq
-# Sidekiq.configure_client do |config|
-#   config.redis = { url: "redis://localhost:6379/1" }
-# end
-
-# Sidekiq.configure_server do |config|
-#   config.redis = { url: "redis://localhost:6379/1"}
-# end
-
-# #Worker
-# class HealthCheck
-  
-#   include Sidekiq::Worker
-#   sidekiq_options :queue => :check, :retry => true, :backtrace => true
-#   def perform(details_id)
-#     count = 0
-#     record = FormDetails.all(:id => details_id)
-#     record_url = record.first.url
-#     if record.first.enabled == true
-#       session_response = RestClient.get(record_url, headers={})
-#       session_code = session_response.code
-
-#       if session_code != 200
-#           # Send mail
-#       else
-#           count = count + 1
-#           count.to_s
-#           puts "I am inside ELSE before recurring for #{count} times"
-#           #Resque.enqueue_in(record.first.interval.second.from_now, Check, details_id)
-#           HealthCheck.perform_in(record.first.interval.second.from_now,details_id)
-
-#           record.first.status = "Last Run: #{Time.now}"
-#           record.save
-#           puts "I am inside ELSE after recurring for #{count} times"
-#       end
-#     end
-#   end
-# end
+require_relative 'lib/mailer.rb'
 
 # app.rb
 class ApplicationController < Sinatra::Base
@@ -140,6 +100,7 @@ class ApplicationController < Sinatra::Base
       if params[:enabled] == true
         HealthCheck.perform_async(@details.id)
       else
+        
       end
     end
     @details.method_name = params[:method_name]
