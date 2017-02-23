@@ -17,7 +17,7 @@ run `bundle install` to get all the gems installed
 `foreman start` 
 or
 `rackup` / `shotgun` to start the app server
-bundle exec sidekiq -C ../lib/sidekiq-worker -q check -v
+- bundle exec sidekiq -C ../lib/sidekiq-worker -q check -v
 
 ## To open the Application:
 
