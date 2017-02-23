@@ -17,9 +17,7 @@ run `bundle install` to get all the gems installed
 `foreman start` 
 or
 `rackup` / `shotgun` to start the app server
-`rake resque:work QUEUE=check VVERBOSE=1` to start resque
-`rake resque:scheduler` to start resque scheduler
-on three terminal windows
+bundle exec sidekiq -C ../lib/sidekiq-worker -q check -v
 
 ## To open the Application:
 
